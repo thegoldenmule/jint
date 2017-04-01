@@ -158,3 +158,10 @@ Jint.sln.ide/*
 .vs
 project.lock.json
 .build
+
+# Unity
+Jint-Unity/Library/
+Jint-Unity/ProjectSettings/
+Jint-Unity/Temp/
+Jint-Unity/*.sln*
+Jint-Unity/*.csproj*
