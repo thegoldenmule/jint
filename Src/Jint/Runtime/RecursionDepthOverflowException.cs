@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Jint.Native;
-using Jint.Parser.Ast;
+using Jint.Runtime.CallStack;
 
 namespace Jint.Runtime
 {
-    using Jint.Runtime.CallStack;
-
     public class RecursionDepthOverflowException : Exception
     {
         public string CallChain { get; private set; }

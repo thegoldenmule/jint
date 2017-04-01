@@ -8,9 +8,8 @@ namespace Jint
         private readonly bool _force;
         private readonly int _forcedRefCount;
 
-        [ThreadStatic] 
         private static int _refCount;
-
+        
         public EvalCodeScope(bool eval = true, bool force = false)
         {
             _eval = eval;

@@ -28,8 +28,6 @@
 // Ported to Java from Mozilla's version of V8-dtoa by Hannes Wallnoefer.
 // The original revision was 67d1049b0bf9 from the mozilla-central tree.
 
-using System.Diagnostics;
-
 namespace Jint.Native.Number.Dtoa
 {
 
@@ -61,7 +59,7 @@ namespace Jint.Native.Number.Dtoa
 
             cMk.F = cachedPower.Significand;
             cMk.E = cachedPower.BinaryExponent;
-            Debug.Assert((alpha <= cMk.E + e) && (cMk.E + e <= gamma));
+            
             return cachedPower.DecimalExponent;
         }
 

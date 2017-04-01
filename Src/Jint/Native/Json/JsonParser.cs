@@ -290,7 +290,7 @@ namespace Jint.Native.Json
 
         private Token ScanStringLiteral()
         {
-            var sb = new System.Text.StringBuilder();
+            string str = "";
 
             char quote = _source.CharCodeAt(_index);
 
@@ -321,13 +321,13 @@ namespace Jint.Native.Json
                         switch (ch)
                         {
                             case 'n':
-                                sb.Append('\n');
+                                str += '\n';
                                 break;
                             case 'r':
-                                sb.Append('\r');
+                                str += '\r';
                                 break;
                             case 't':
-                                sb.Append('\t');
+                                str += '\t';
                                 break;
                             case 'u':
                             case 'x':
@@ -335,22 +335,22 @@ namespace Jint.Native.Json
                                 char unescaped = ScanHexEscape(ch);
                                 if (unescaped > 0)
                                 {
-                                    sb.Append(unescaped.ToString());
+                                    str += unescaped.ToString();
                                 }
                                 else
                                 {
                                     _index = restore;
-                                    sb.Append(ch.ToString());
+                                    str += ch.ToString();
                                 }
                                 break;
                             case 'b':
-                                sb.Append("\b");
+                                str += "\b";
                                 break;
                             case 'f':
-                                sb.Append("\f");
+                                str += "\f";
                                 break;
                             case 'v':
-                                sb.Append("\x0B");
+                                str += "\x0B";
                                 break;
 
                             default:
@@ -371,11 +371,11 @@ namespace Jint.Native.Json
                                             code = code * 8 + "01234567".IndexOf(_source.CharCodeAt(_index++));
                                         }
                                     }
-                                    sb.Append(((char)code).ToString());
+                                    str += ((char)code).ToString();
                                 }
                                 else
                                 {
-                                    sb.Append(ch.ToString());
+                                    str += ch.ToString();
                                 }
                                 break;
                         }
@@ -395,7 +395,7 @@ namespace Jint.Native.Json
                 }
                 else
                 {
-                    sb.Append(ch.ToString());
+                    str += ch.ToString();
                 }
             }
 
@@ -407,7 +407,7 @@ namespace Jint.Native.Json
             return new Token
                 {
                     Type = Tokens.String,
-                    Value = sb.ToString(),
+                    Value = str,
                     LineNumber = _lineNumber,
                     LineStart = _lineStart,
                     Range = new[] {start, _index}
@@ -783,7 +783,6 @@ namespace Jint.Native.Json
             switch (type)
             {
                 case Tokens.NullLiteral:
-                    var v = Lex().Value;
                     return Null.Instance;
                 case Tokens.BooleanLiteral:
                     return new JsValue((bool)Lex().Value);
@@ -861,8 +860,7 @@ namespace Jint.Native.Json
                 JsValue jsv = ParseJsonValue();
 
                 Peek();
-                Tokens type = _lookahead.Type;
-                object value = _lookahead.Value;                
+
                 if(_lookahead.Type != Tokens.EOF)
                 {
                     throw new JavaScriptException(_engine.SyntaxError, string.Format("Unexpected {0} {1}", _lookahead.Type, _lookahead.Value));

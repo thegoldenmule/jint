@@ -8,7 +8,6 @@ namespace Jint
         private readonly bool _force;
         private readonly int _forcedRefCount;
 
-        [ThreadStatic] 
         private static int _refCount;
 
         public StrictModeScope(bool strict = true, bool force = false)
@@ -26,7 +25,6 @@ namespace Jint
             {
                 _refCount++;
             }
-
         }
 
         public void Dispose()

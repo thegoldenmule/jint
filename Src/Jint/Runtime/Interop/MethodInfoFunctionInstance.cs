@@ -4,8 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using Jint.Native;
-using Jint.Native.Array;
 using Jint.Native.Function;
 
 namespace Jint.Runtime.Interop
@@ -29,7 +29,7 @@ namespace Jint.Runtime.Interop
         public JsValue Invoke(MethodInfo[] methodInfos, JsValue thisObject, JsValue[] jsArguments)
         {
             var arguments = ProcessParamsArrays(jsArguments, methodInfos);
-            var methods = TypeConverter.FindBestMatch(Engine, methodInfos, arguments).ToList();
+            var methods = TypeConverter.FindBestMatch(Engine, methodInfos, arguments);
             var converter = Engine.ClrTypeConverter;
 
             foreach (var method in methods)
@@ -44,23 +44,6 @@ namespace Jint.Runtime.Interop
                     if (parameterType == typeof(JsValue))
                     {
                         parameters[i] = arguments[i];
-                    }
-                    else if (parameterType == typeof(JsValue[]) && arguments[i].IsArray())
-                    {
-                        // Handle specific case of F(params JsValue[])
-
-                        var arrayInstance = arguments[i].AsArray();
-                        var len = TypeConverter.ToInt32(arrayInstance.Get("length"));
-                        var result = new JsValue[len];
-                        for (var k = 0; k < len; k++)
-                        {
-                            var pk = k.ToString();
-                            result[k] = arrayInstance.HasProperty(pk)
-                                ? arrayInstance.Get(pk)
-                                : JsValue.Undefined;
-                        }
-
-                        parameters[i] = result;
                     }
                     else
                     {
@@ -87,18 +70,28 @@ namespace Jint.Runtime.Interop
                 return JsValue.FromObject(Engine, method.Invoke(thisObject.ToObject(), parameters.ToArray()));
             }
 
-            throw new JavaScriptException(Engine.TypeError, "No public methods with the specified arguments were found.");
+            var methodName = methodInfos.Length > 0 ? methodInfos[0].Name : "?";
+
+            var argumentLog = new string[arguments.Length];
+            for (int i = 0, len = arguments.Length; i < len; i++)
+            {
+                argumentLog[i] = arguments[i].ToString();
+            }
+
+            throw new JavaScriptException(
+                Engine.TypeError,
+                string.Format("No public method found for {0}::{1}({2})",
+                thisObject.ToObject().GetType().Name,
+                methodName,
+                string.Join(", ", argumentLog)));
         }
 
-        /// <summary>
-        /// Reduces a flat list of parameters to a params array
-        /// </summary>
         private JsValue[] ProcessParamsArrays(JsValue[] jsArguments, IEnumerable<MethodInfo> methodInfos)
         {
             foreach (var methodInfo in methodInfos)
             {
                 var parameters = methodInfo.GetParameters();
-                if (!parameters.Any(p => p.HasAttribute<ParamArrayAttribute>()))
+                if (!parameters.Any(p => Attribute.IsDefined(p, typeof(ParamArrayAttribute))))
                     continue;
 
                 var nonParamsArgumentsCount = parameters.Length - 1;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+
 using Jint.Native.Array;
 using Jint.Native.Function;
 using Jint.Native.Object;
@@ -74,18 +74,13 @@ namespace Jint.Native.String
         // http://msdn.microsoft.com/en-us/library/system.char.iswhitespace(v=vs.110).aspx
         // http://en.wikipedia.org/wiki/Byte_order_mark
         const char BOM_CHAR = '\uFEFF';
-        const char MONGOLIAN_VOWEL_SEPARATOR = '\u180E';
 
         private static bool IsWhiteSpaceEx(char c)
         {
-            return 
-                char.IsWhiteSpace(c) || 
-                c == BOM_CHAR ||
-                // In .NET 4.6 this was removed from WS based on Unicode 6.3 changes
-                c == MONGOLIAN_VOWEL_SEPARATOR;
+            return char.IsWhiteSpace(c) || c == BOM_CHAR;
         }
 
-        public static string TrimEndEx(string s)
+        private static string TrimEndEx(string s)
         {
             if (s.Length == 0)
                 return string.Empty;
@@ -104,7 +99,7 @@ namespace Jint.Native.String
                 return string.Empty;
         }
 
-        public static string TrimStartEx(string s)
+        private static string TrimStartEx(string s)
         {
             if (s.Length == 0)
                 return string.Empty;
@@ -123,7 +118,7 @@ namespace Jint.Native.String
                 return s.Substring(i);
         }
 
-        public static string TrimEx(string s)
+        private static string TrimEx(string s)
         {
             return TrimEndEx(TrimStartEx(s));
         } 
@@ -315,30 +310,28 @@ namespace Jint.Native.String
 
                 return a;
             }
+            
+            var segments = new List<string>();
+            var sep = TypeConverter.ToString(separator);
+
+            if (sep == string.Empty || (rx != null && rx.Source == regExpForMatchingAllCharactere)) // for s.split(new RegExp)
+            {
+                for (int i = 0, length = s.Length; i < length; i++)
+                {
+                    segments.Add(s[i].ToString());
+                }
+            }
             else
             {
-                var segments = new List<string>();
-                var sep = TypeConverter.ToString(separator);
-
-                if (sep == string.Empty || (rx != null && rx.Source == regExpForMatchingAllCharactere)) // for s.split(new RegExp)
-                {
-                    foreach (var c in s)
-                    {
-                        segments.Add(c.ToString());    
-                    }
-                }
-                else
-                {
-                    segments = s.Split(new[] {sep}, StringSplitOptions.None).ToList();
-                }
-
-                for (int i = 0; i < segments.Count && i < limit; i++)
-                {
-                    a.DefineOwnProperty(i.ToString(), new PropertyDescriptor(segments[i], true, true, true), false);
-                }
-            
-                return a;
+                segments = new List<string>(s.Split(new[] {sep}, StringSplitOptions.None));
             }
+
+            for (int i = 0, length = segments.Count; i < length && i < limit; i++)
+            {
+                a.DefineOwnProperty(i.ToString(), new PropertyDescriptor(segments[i], true, true, true), false);
+            }
+            
+            return a;
         }
 
         private JsValue Slice(JsValue thisObj, JsValue[] arguments)

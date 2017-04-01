@@ -9,7 +9,7 @@ namespace Jint.Parser
     /// </summary>
     public interface IVariableScope
     {
-        IList<VariableDeclaration> VariableDeclarations { get; set; }
+        List<VariableDeclaration> VariableDeclarations { get; set; }
     }
 
     public class VariableScope : IVariableScope
@@ -19,6 +19,6 @@ namespace Jint.Parser
             VariableDeclarations = new List<VariableDeclaration>();
         }
 
-        public IList<VariableDeclaration> VariableDeclarations { get; set; }
+        public List<VariableDeclaration> VariableDeclarations { get; set; }
     }
 }

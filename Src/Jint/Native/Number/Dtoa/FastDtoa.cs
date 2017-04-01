@@ -29,7 +29,6 @@
 // The original revision was 67d1049b0bf9 from the mozilla-central tree.
 
 using System;
-using System.Diagnostics;
 
 namespace Jint.Native.Number.Dtoa
 {
@@ -469,14 +468,11 @@ namespace Jint.Native.Number.Dtoa
             // Grisu3 will never output representations that lie exactly on a boundary.
             DiyFp boundaryMinus = new DiyFp(), boundaryPlus = new DiyFp();
             DoubleHelper.NormalizedBoundaries(bits, boundaryMinus, boundaryPlus);
-            Debug.Assert(boundaryPlus.E == w.E);
+            
             var tenMk = new DiyFp(); // Cached power of ten: 10^-k
             int mk = CachedPowers.GetCachedPower(w.E + DiyFp.KSignificandSize,
                 MinimalTargetExponent, MaximalTargetExponent, tenMk);
-            Debug.Assert(MinimalTargetExponent <= w.E + tenMk.E +
-                         DiyFp.KSignificandSize &&
-                         MaximalTargetExponent >= w.E + tenMk.E +
-                         DiyFp.KSignificandSize);
+            
             // Note that ten_mk is only an approximation of 10^-k. A DiyFp only contains a
             // 64 bit significand and ten_mk is thus only precise up to 64 bits.
 
@@ -487,8 +483,7 @@ namespace Jint.Native.Number.Dtoa
             // In other words: let f = scaled_w.f() and e = scaled_w.e(), then
             //           (f-1) * 2^e < w*10^k < (f+1) * 2^e
             DiyFp scaledW = DiyFp.Times(w, tenMk);
-            Debug.Assert(scaledW.E ==
-                         boundaryPlus.E + tenMk.E + DiyFp.KSignificandSize);
+
             // In theory it would be possible to avoid some recomputations by computing
             // the difference between w and boundary_minus/plus (a power of 2) and to
             // compute scaled_boundary_minus/plus by subtracting/adding from
@@ -508,10 +503,6 @@ namespace Jint.Native.Number.Dtoa
 
         public static bool Dtoa(double v, FastDtoaBuilder buffer)
         {
-            Debug.Assert(v > 0);
-            Debug.Assert(!Double.IsNaN(v));
-            Debug.Assert(!Double.IsInfinity(v));
-
             return Grisu3(v, buffer);
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using Jint.Native;
 using Jint.Native.Object;
@@ -45,7 +46,7 @@ namespace Jint.Runtime.Interop
 
         public JsValue Call(JsValue thisObject, JsValue[] arguments)
         {
-            // direct calls on a NamespaceReference constructor object is creating a generic type
+            // direct calls on a NamespaceReference constructor object is creating a generic type 
             var genericTypes = new Type[arguments.Length];
             for (int i = 0; i < arguments.Length; i++)
             {
@@ -55,7 +56,7 @@ namespace Jint.Runtime.Interop
                     throw new JavaScriptException(Engine.TypeError, "Invalid generic type parameter");
                 }
 
-                genericTypes[i] = arguments.At(i).As<TypeReference>().Type;
+                genericTypes[i] = arguments.At(0).As<TypeReference>().Type;
             }
 
             var typeReference = GetPath(_path + "`" + arguments.Length.ToString(CultureInfo.InvariantCulture)).As<TypeReference>();
@@ -100,13 +101,7 @@ namespace Jint.Runtime.Interop
             }
 
             // search in loaded assemblies
-#if NETSTANDARD1_3
-            var lookupAssemblies = new[] { typeof(NamespaceReference).GetTypeInfo().Assembly };
-#else
-            var lookupAssemblies = new[] { Assembly.GetCallingAssembly(), Assembly.GetExecutingAssembly() };
-#endif
-
-            foreach (var assembly in lookupAssemblies)
+            foreach (var assembly in new[] { Assembly.GetCallingAssembly(), Assembly.GetExecutingAssembly() }.Distinct())
             {
                 type = assembly.GetType(path);
                 if (type != null)
@@ -117,8 +112,11 @@ namespace Jint.Runtime.Interop
             }
 
             // search in lookup assemblies
-            foreach (var assembly in Engine.Options._LookupAssemblies)
+            var assemblies = Engine.Options.LookupAssemblies;
+            for (int i = 0, len = assemblies.Count; i < len; i++)
             {
+                var assembly = assemblies[i];
+
                 type = assembly.GetType(path);
                 if (type != null)
                 {
@@ -137,7 +135,7 @@ namespace Jint.Runtime.Interop
                       Engine.TypeCache.Add(path.Replace("+", "."), nType);
                       return TypeReference.CreateTypeReference(Engine, nType);
                     }
-                  }
+                  }            
             }
 
             // the new path doesn't represent a known class, thus return a new namespace instance

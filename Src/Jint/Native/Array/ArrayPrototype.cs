@@ -21,7 +21,7 @@ namespace Jint.Native.Array
         {
             var obj = new ArrayPrototype(engine)
                 {
-                    Extensible = true,
+                    Extensible = true, 
                     Prototype = engine.Object.PrototypeObject
                 };
 
@@ -387,11 +387,11 @@ namespace Jint.Native.Array
                 var fromPresent = o.HasProperty(from);
                 if (fromPresent)
                 {
-                    var fromValue = o.Get(from);
+                    var fromValue = o.Get(from); 
                     a.DefineOwnProperty(k.ToString(), new PropertyDescriptor(fromValue, true, true, true), false);
                 }
             }
-
+            
             var items = arguments.Skip(2).ToArray();
             if (items.Length < actualDeleteCount)
             {
@@ -477,7 +477,7 @@ namespace Jint.Native.Array
         {
             if (!thisObj.IsObject())
             {
-                throw new JavaScriptException(Engine.TypeError, "Array.prorotype.sort can only be applied on objects");
+                throw new JavaScriptException(Engine.TypeError, "Array.prorotype.sort can only be applied on objects");  
             }
 
             var obj = thisObj.AsObject();
@@ -518,16 +518,8 @@ namespace Jint.Native.Array
 
                     if (compareFn != null)
                     {
-                        var s = TypeConverter.ToNumber(compareFn.Call(Undefined.Instance, new[] {x, y}));
-                        if (s < 0)
-                        {
-                            return -1;
-                        }
-                        if (s > 0)
-                        {
-                            return 1;
-                        }
-                        return 0;
+                        var s = (int) TypeConverter.ToUint32(compareFn.Call(Undefined.Instance, new[] {x, y}));
+                        return s;
                     }
 
                     var xString = TypeConverter.ToString(x);
@@ -538,7 +530,7 @@ namespace Jint.Native.Array
                 };
 
             var array = Enumerable.Range(0, lenVal).Select(i => obj.Get(i.ToString())).ToArray();
-
+            
             // don't eat inner exceptions
             try
             {
@@ -549,7 +541,7 @@ namespace Jint.Native.Array
                 throw e.InnerException;
             }
 
-            foreach (var i in Enumerable.Range(0, lenVal))
+            for (var i = 0; i < lenVal; i++)
             {
                 obj.Put(i.ToString(), array[i], false);
             }
@@ -650,7 +642,7 @@ namespace Jint.Native.Array
             var o = TypeConverter.ToObject(Engine, thisObj);
             var lenVal = o.Get("length");
             var len = TypeConverter.ToUint32(lenVal);
-            var middle = (uint)System.Math.Floor(len/2.0);
+            var middle = (uint)System.Math.Floor(len/2f);
             uint lower = 0;
             while (lower != middle)
             {
@@ -694,7 +686,7 @@ namespace Jint.Native.Array
                 separator = ",";
             }
             var sep = TypeConverter.ToString(separator);
-
+            
             // as per the spec, this has to be called after ToString(separator)
             if (len == 0)
             {
@@ -775,8 +767,9 @@ namespace Jint.Native.Array
             var items = new List<JsValue> {o};
             items.AddRange(arguments);
 
-            foreach (var e in items)
+            for (int i = 0, length = items.Count; i < length; i++)
             {
+                var e = items[i];
                 var eArray = e.TryCast<ArrayInstance>();
                 if (eArray != null)
                 {
@@ -803,7 +796,7 @@ namespace Jint.Native.Array
             // this is not in the specs, but is necessary in case the last element of the last
             // array doesn't exist, and thus the length would not be incremented
             a.DefineOwnProperty("length", new PropertyDescriptor(n, null, null, null), false);
-
+            
             return a;
         }
 
@@ -884,17 +877,20 @@ namespace Jint.Native.Array
         {
             ObjectInstance o = TypeConverter.ToObject(Engine, thisObject);
             var lenVal = TypeConverter.ToNumber(o.Get("length"));
-
+            
             // cast to double as we need to prevent an overflow
             double n = TypeConverter.ToUint32(lenVal);
-            foreach (JsValue e in arguments)
+            for (int i = 0, len = arguments.Length; i < len; i++)
             {
-                o.Put(TypeConverter.ToString(n), e, true);
+                o.Put(
+                    TypeConverter.ToString(n),
+                    arguments[i],
+                    true);
                 n++;
             }
 
             o.Put("length", n, true);
-
+            
             return n;
         }
 

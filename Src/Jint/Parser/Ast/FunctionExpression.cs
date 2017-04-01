@@ -10,12 +10,12 @@ namespace Jint.Parser.Ast
         }
 
         public Identifier Id { get; set; }
-        public IEnumerable<Identifier> Parameters { get; set; }
+        public List<Identifier> Parameters { get; set; }
         public Statement Body { get; set; }
         public bool Strict { get; set; }
 
-        public IList<VariableDeclaration> VariableDeclarations { get; set; }
-        public IList<FunctionDeclaration> FunctionDeclarations { get; set; }
+        public List<VariableDeclaration> VariableDeclarations { get; set; }
+        public List<FunctionDeclaration> FunctionDeclarations { get; set; }
 
         #region ECMA6
         public IEnumerable<Expression> Defaults;

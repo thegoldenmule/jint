@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+
 using Jint.Native.Function;
 using Jint.Native.String;
 using Jint.Runtime;
@@ -11,6 +11,7 @@ namespace Jint.Native.Object
     public sealed class ObjectConstructor : FunctionInstance, IConstructor
     {
         private readonly Engine _engine;
+        private readonly List<string> _tempKeyList = new List<string>();
 
         private ObjectConstructor(Engine engine) : base(engine, null, null, false)
         {
@@ -153,9 +154,11 @@ namespace Jint.Native.Object
                 }  
             }
 
-            foreach (var p in o.GetOwnProperties())
+            foreach (var key in o.Properties.Keys)
             {
-                array.DefineOwnProperty(n.ToString(), new PropertyDescriptor(p.Key, true, true, true), false);
+                array.DefineOwnProperty(
+                    n.ToString(),
+                    new PropertyDescriptor(key, true, true, true), false);
                 n++;
             }
 
@@ -214,21 +217,21 @@ namespace Jint.Native.Object
 
             var properties = arguments.At(1);
             var props = TypeConverter.ToObject(Engine, properties);
-            var descriptors = new List<KeyValuePair<string, PropertyDescriptor>>();
-            foreach (var p in props.GetOwnProperties())
+            
+            foreach (var pair in props.Properties)
             {
-                if (!p.Value.Enumerable.HasValue || !p.Value.Enumerable.Value)
+                var key = pair.Key;
+                var value = pair.Value;
+
+                if (!value.Enumerable.HasValue || !value.Enumerable.Value.AsBoolean())
                 {
                     continue;
                 }
 
-                var descObj = props.Get(p.Key);
+                var descObj = props.Get(key);
                 var desc = PropertyDescriptor.ToPropertyDescriptor(Engine, descObj);
-                descriptors.Add(new KeyValuePair<string, PropertyDescriptor>(p.Key, desc));
-            }
-            foreach (var pair in descriptors)
-            {
-                o.DefineOwnProperty(pair.Key, pair.Value, true);
+
+                o.DefineOwnProperty(key, desc, true);
             }
 
             return o;
@@ -243,14 +246,17 @@ namespace Jint.Native.Object
                 throw new JavaScriptException(Engine.TypeError);
             }
 
-            foreach (var prop in o.GetOwnProperties())
+            foreach (var pair in o.Properties)
             {
-                if (prop.Value.Configurable.HasValue && prop.Value.Configurable.Value)
+                var key = pair.Key;
+                var value = pair.Value;
+
+                if (value.Configurable.HasValue && value.Configurable.Value.AsBoolean())
                 {
-                    prop.Value.Configurable = false;
+                    value.Configurable = JsValue.False;
                 }
 
-                o.DefineOwnProperty(prop.Key, prop.Value, true);
+                o.DefineOwnProperty(key, value, true);
             }
 
             o.Extensible = false;
@@ -267,20 +273,20 @@ namespace Jint.Native.Object
                 throw new JavaScriptException(Engine.TypeError);
             }
 
-            var keys = o.GetOwnProperties().Select(x => x.Key);
-            foreach (var p in keys)
+            foreach (var key in o.Properties.Keys)
             {
+                var p = key;
                 var desc = o.GetOwnProperty(p);
                 if (desc.IsDataDescriptor())
                 {
-                    if (desc.Writable.HasValue && desc.Writable.Value)
+                    if (desc.Writable.HasValue && desc.Writable.Value.AsBoolean())
                     {
-                        desc.Writable = false;
+                        desc.Writable = JsValue.False;
                     }
                 }
-                if (desc.Configurable.HasValue && desc.Configurable.Value)
+                if (desc.Configurable.HasValue && desc.Configurable.Value.AsBoolean())
                 {
-                    desc.Configurable = false;
+                    desc.Configurable = JsValue.False;
                 }
                 o.DefineOwnProperty(p, desc, true);
             }
@@ -313,9 +319,10 @@ namespace Jint.Native.Object
                 throw new JavaScriptException(Engine.TypeError);
             }
 
-            foreach (var prop in o.GetOwnProperties())
+            foreach (var value in o.Properties.Values)
             {
-                if (prop.Value.Configurable.Value == true)
+                var jsValue = value.Configurable;
+                if (jsValue != null && jsValue.Value == true)
                 {
                     return false;
                 }
@@ -338,17 +345,18 @@ namespace Jint.Native.Object
                 throw new JavaScriptException(Engine.TypeError);
             }
 
-            foreach (var p in o.GetOwnProperties().Select(x => x.Key))
+            foreach (var key in o.Properties.Keys)
             {
+                var p = key;
                 var desc = o.GetOwnProperty(p);
                 if (desc.IsDataDescriptor())
                 {
-                    if (desc.Writable.HasValue && desc.Writable.Value)
+                    if (desc.Writable.HasValue && desc.Writable.Value.AsBoolean())
                     {
                         return false;
                     }
                 }
-                if (desc.Configurable.HasValue && desc.Configurable.Value)
+                if (desc.Configurable.HasValue && desc.Configurable.Value.AsBoolean())
                 {
                     return false;
                 }
@@ -383,21 +391,32 @@ namespace Jint.Native.Object
                 throw new JavaScriptException(Engine.TypeError);
             }
 
-            var enumerableProperties = o.GetOwnProperties()
-                .Where(x => x.Value.Enumerable.HasValue && x.Value.Enumerable.Value)
-                .ToArray();
-            var n = enumerableProperties.Length;
-            var array = Engine.Array.Construct(new JsValue[] {n});
-            var index = 0;
-            foreach (var prop in enumerableProperties)
+            _tempKeyList.Clear();
+
+            foreach (var pair in o.Properties)
             {
-                var p = prop.Key;
+                var value = pair.Value;
+                if (value.Enumerable.HasValue && value.Enumerable.Value.AsBoolean())
+                {
+                    _tempKeyList.Add(pair.Key);
+                }
+            }
+
+            var array = Engine.Array.Construct(new JsValue[]
+            {
+                _tempKeyList.Count
+            });
+
+            var index = 0;
+            for (int i = 0, len = _tempKeyList.Count; i < len; i++)
+            {
                 array.DefineOwnProperty(
                     TypeConverter.ToString(index), 
-                    new PropertyDescriptor(p, true, true, true), 
+                    new PropertyDescriptor(_tempKeyList[i], true, true, true), 
                     false);
                 index++;
             }
+
             return array;
         }
     }

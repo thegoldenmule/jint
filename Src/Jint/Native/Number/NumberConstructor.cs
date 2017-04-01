@@ -69,5 +69,7 @@ namespace Jint.Native.Number
 
             return instance;
         }
+
+
     }
 }

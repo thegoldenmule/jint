@@ -47,7 +47,7 @@
 
         public override string ToString()
         {
-            return string.Join("->", _stack.Select(cse => cse.ToString()).Reverse());
+            return string.Join("->", _stack.Select(cse => cse.ToString()).Reverse().ToArray());
         }
     }
 }

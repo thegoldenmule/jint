@@ -6,7 +6,6 @@ using System.Reflection;
 using Jint.Native;
 using Jint.Native.Number;
 using Jint.Native.Object;
-using Jint.Native.String;
 
 namespace Jint.Runtime
 {
@@ -135,7 +134,7 @@ namespace Jint.Runtime
 
             if (o.IsString())
             {
-                var s = StringPrototype.TrimEx(o.AsString());
+                var s = o.AsString().Trim();
 
                 if (String.IsNullOrEmpty(s))
                 {
@@ -399,7 +398,7 @@ namespace Jint.Runtime
 
         public static bool TypeIsNullable(Type type)
         {
-            return !type.IsValueType() || Nullable.GetUnderlyingType(type) != null;
+            return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
         }
     }
 }

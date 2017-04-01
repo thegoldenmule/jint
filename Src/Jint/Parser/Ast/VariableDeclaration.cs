@@ -4,7 +4,7 @@ namespace Jint.Parser.Ast
 {
     public class VariableDeclaration : Statement
     {
-        public IEnumerable<VariableDeclarator> Declarations;
+        public List<VariableDeclarator> Declarations;
         public string Kind;
     }
 }

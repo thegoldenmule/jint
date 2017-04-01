@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Jint.Native.Object;
-using Jint.Native.String;
 using Jint.Parser;
 using Jint.Parser.Ast;
 using Jint.Runtime;
@@ -53,7 +52,7 @@ namespace Jint.Native.Function
             var newValues = new string[values.Length];
             for (var i = 0; i < values.Length; i++)
             {
-                newValues[i] = StringPrototype.TrimEx(values[i]);
+                newValues[i] = values[i].Trim();
             }
             return newValues;
         }
@@ -94,6 +93,16 @@ namespace Jint.Native.Function
                 throw new JavaScriptException(Engine.SyntaxError);
             }
 
+            var identifiers = new List<Identifier>();
+            for (int i = 0, len = parameters.Length; i < len; i++)
+            {
+                identifiers.Add(new Identifier
+                {
+                    Type = SyntaxNodes.Identifier,
+                    Name = parameters[i]
+                });
+            }
+
             // todo: check if there is not a way to use the FunctionExpression directly instead of creating a FunctionDeclaration
             var functionObject = new ScriptFunctionInstance(
                 Engine,
@@ -101,15 +110,11 @@ namespace Jint.Native.Function
                     {
                         Type = SyntaxNodes.FunctionDeclaration,
                         Body = new BlockStatement
-                            {
-                                Type = SyntaxNodes.BlockStatement,
-                                Body = new [] { function.Body }
-                            },
-                        Parameters = parameters.Select(x => new Identifier
-                            {
-                                Type = SyntaxNodes.Identifier,
-                                Name = x
-                            }).ToArray(),
+                        {
+                            Type = SyntaxNodes.BlockStatement,
+                            Body = new List<Statement>{ function.Body }
+                        },
+                        Parameters = identifiers,
                         FunctionDeclarations = function.FunctionDeclarations,
                         VariableDeclarations = function.VariableDeclarations
                     },  

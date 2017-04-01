@@ -60,7 +60,7 @@ namespace Jint.Native.Number
 
             if (m < 0)
             {
-                return "-" + ToLocaleString(-m, arguments);
+                return "-" + ToNumberString(-m);
             }
 
             if (double.IsPositiveInfinity(m) || m >= double.MaxValue)
@@ -73,7 +73,7 @@ namespace Jint.Native.Number
                 return "-Infinity";
             }
 
-            return m.ToString("n", Engine.Options._Culture);
+            return m.ToString("n", Engine.Options.Culture);
         }
 
         private JsValue ValueOf(JsValue thisObj, JsValue[] arguments)
@@ -108,8 +108,16 @@ namespace Jint.Native.Number
             {
                 return ToNumberString(x);
             }
+    
+            var l = (long) x; // extract integer part
 
-            return x.ToString("f" + f, CultureInfo.InvariantCulture);
+            if (f == 0)
+            {
+                return l.ToString(CultureInfo.InvariantCulture);
+            }
+
+            var d = x - l;
+            return l.ToString(CultureInfo.InvariantCulture) + d.ToString("." + new string('0', f), CultureInfo.InvariantCulture);
         }
 
         private JsValue ToExponential(JsValue thisObj, JsValue[] arguments)
@@ -295,7 +303,7 @@ namespace Jint.Native.Number
             // 123.4 s=1234, k=4, n=3
             // 1234000 s = 1234, k=4, n=7
             string s = null;
-            var rFormat = m.ToString("r", CultureInfo.InvariantCulture);
+            var rFormat = m.ToString("r");
             if (rFormat.IndexOf("e", StringComparison.OrdinalIgnoreCase) == -1)
             {
                 s = rFormat.Replace(".", "").TrimStart('0').TrimEnd('0');

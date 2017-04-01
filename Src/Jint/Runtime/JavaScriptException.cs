@@ -43,11 +43,5 @@ namespace Jint.Runtime
         {
             return _errorObject.ToString();
         }
-
-        public Jint.Parser.Location Location { get; set; }
-
-        public int LineNumber { get { return null == Location ? 0 : Location.Start.Line; } }
-
-        public int Column { get { return null == Location ? 0 : Location.Start.Column; } }
     }
 }
