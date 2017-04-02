@@ -129,8 +129,7 @@ namespace TheGoldenMule
         /// </summary>
         public void Clear()
         {
-            _executionContext.Clear();
-            _executionContext.WriteLine(_prompt);
+            Text.text = string.Empty;
         }
 
         /// <summary>
@@ -258,9 +257,9 @@ namespace TheGoldenMule
         /// </summary>
         private void BakePrompt()
         {
-            _prompt = (string.IsNullOrEmpty(Root) ? "" : Root + "/")
-                      + string.Join("/", _dirs.ToArray())
-                      + "> ";
+            _prompt = (string.IsNullOrEmpty(Root) ? "" : Root)
+                + (_dirs.Count > 0 ? "/" + string.Join("/", _dirs.ToArray()) : string.Empty)
+                + "> ";
         }
     }
 }

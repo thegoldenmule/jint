@@ -11,6 +11,7 @@ namespace JintUnity
         /// Constructor.
         /// </summary>
         public UnityScriptingHost()
+            : base(options => options.AllowClr())
         {
             SetValue("Log", new UnityLogWrapper());
             SetValue("Scene", new UnitySceneManager());
