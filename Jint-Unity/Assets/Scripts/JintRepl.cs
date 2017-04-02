@@ -59,6 +59,7 @@ namespace JintUnity
                 context.WriteLine(" => " + exception.Message);
             }
 
+            context.WriteLine(null);
             complete();
         }
     }
