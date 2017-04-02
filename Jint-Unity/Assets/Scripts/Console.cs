@@ -8,36 +8,60 @@ public interface IConsoleDelegate
 {
     void Execute(
         string command,
-        IConsoleContext context);
+        IConsoleContext context,
+        Action complete);
 }
 
 public interface IConsoleContext
 {
+    void Clear();
     void WriteLine(string line);
-    void Complete();
+    void Write(string text);
 }
 
 public class DefaultConsoleContext : IConsoleContext
 {
-    private readonly Action<string> _writeLine;
-    private readonly Action _complete; 
+    private readonly Text _text;
 
-    public DefaultConsoleContext(
-        Action<string> writeLine,
-        Action complete)
+    public DefaultConsoleContext(Text textfield)
     {
-        _writeLine = writeLine;
-        _complete = complete;
+        _text = textfield;
     }
 
+    public void Clear()
+    {
+        if (null != _text)
+        {
+            _text.text = string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Writes test to the console.
+    /// </summary>
+    /// <param name="text"></param>
+    public void Write(string text)
+    {
+        if (null == _text)
+        {
+            return;
+        }
+
+        _text.text += text;
+    }
+
+    /// <summary>
+    /// Writes a line to the console.
+    /// </summary>
+    /// <param name="line"></param>
     public void WriteLine(string line)
     {
-        _writeLine(line);
-    }
+        if (!line.EndsWith('\n'.ToString()))
+        {
+            line = line + '\n';
+        }
 
-    public void Complete()
-    {
-        _complete();
+        Write(line);
     }
 }
 
@@ -70,15 +94,34 @@ public class DefaultConsoleContext : IConsoleContext
 /// </summary>
 public class Console : MonoBehaviour
 {
-    public Text TextField;
+    /// <summary>
+    /// The context implementation.
+    /// </summary>
+    public IConsoleContext Context;
+
+    /// <summary>
+    /// Root of prompt. Always visible.
+    /// </summary>
     public string Root;
+
+    /// <summary>
+    /// If true, echos commands to console.
+    /// </summary>
     public bool EchoCommands;
 
+    /// <summary>
+    /// Stack of dirs which are combined into a prompt.
+    /// </summary>
     private readonly Stack<string> _dirs = new Stack<string>();
+
+    /// <summary>
+    /// Prompt!
+    /// </summary>
     private string _prompt;
     
-    private DefaultConsoleContext _context;
-
+    /// <summary>
+    /// Buffer + index with which to accumulate input.
+    /// </summary>
     private char[] _accumBuffer = new char[255];
     private int _accumBufferIndex = 0;
 
@@ -97,7 +140,11 @@ public class Console : MonoBehaviour
         _dirs.Push(dir);
 
         BakePrompt();
-        WriteLine(_prompt);
+
+        if (null != Context)
+        {
+            Context.WriteLine(_prompt);
+        }
     }
 
     /// <summary>
@@ -108,6 +155,11 @@ public class Console : MonoBehaviour
         _dirs.Pop();
 
         BakePrompt();
+
+        if (null != Context)
+        {
+            Context.WriteLine(_prompt);
+        }
     }
     
     /// <summary>
@@ -115,13 +167,8 @@ public class Console : MonoBehaviour
     /// </summary>
     public void Clear()
     {
-        if (null == TextField)
-        {
-            return;
-        }
-
-        TextField.text = string.Empty;
-        WriteLine(_prompt);
+        Context.Clear();
+        Context.WriteLine(_prompt);
     }
 
     /// <summary>
@@ -129,8 +176,6 @@ public class Console : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        _context = new DefaultConsoleContext(WriteLine, CompleteCommand);
-
         BakePrompt();
     }
 
@@ -154,14 +199,15 @@ public class Console : MonoBehaviour
 
                 if (EchoCommands)
                 {
-                    WriteLine(command);
+                    Context.WriteLine(command);
                 }
 
                 if (null != CommandDelegate)
                 {
                     CommandDelegate.Execute(
                         command,
-                        _context);
+                        Context,
+                        CompleteCommand);
                 }
             }
             else
@@ -184,21 +230,7 @@ public class Console : MonoBehaviour
     /// </summary>
     private void CompleteCommand()
     {
-        WriteLine(_prompt);
-    }
-
-    /// <summary>
-    /// Writes a line to the console.
-    /// </summary>
-    /// <param name="line"></param>
-    private void WriteLine(string line)
-    {
-        if (null == TextField)
-        {
-            return;
-        }
-
-        TextField.text += line;
+        Context.WriteLine(_prompt);
     }
 
     /// <summary>
