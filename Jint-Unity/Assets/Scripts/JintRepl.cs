@@ -1,32 +1,37 @@
 ﻿using System;
-using JintUnity;
+using TheGoldenMule;
 using UnityEngine;
 using UnityEngine.UI;
+using Console = TheGoldenMule.Console;
 
-public class JintRepl : MonoBehaviour, IConsoleExecutionDelegate
+namespace JintUnity
 {
-    public Text Textfield;
-    public Console Console;
-
-    private readonly UnityScriptingHost _host = new UnityScriptingHost();
-
-    private void Awake()
+    public class JintRepl : MonoBehaviour, IConsoleExecutionDelegate
     {
-        if (null == Console || null == Textfield)
+        public Console Console;
+
+        private readonly UnityScriptingHost _host = new UnityScriptingHost();
+
+        private void Awake()
         {
-            Debug.LogWarning("Cannot initialize JintRepl: must have Textfield and Console!");
-            return;
+            if (null == Console || null == Console.Text)
+            {
+                Debug.LogWarning("Cannot initialize JintRepl: must have Console and Console must have Text!");
+                return;
+            }
+
+            Console.Init(this, new DefaultConsoleExecutionContext(Console.Text));
         }
 
-        Console.ExecutionContext = new DefaultConsoleExecutionContext(Textfield);
-        Console.ExecutionDelegate = this;
-    }
+        public void Execute(
+            string command,
+            IConsoleExecutionContext context,
+            Action complete)
+        {
+            _host.Execute(command);
+            context.WriteLine(_host.GetCompletionValue().ToString());
 
-    public void Execute(
-        string command,
-        IConsoleExecutionContext context,
-        Action complete)
-    {
-        Debug.Log("Execute : " + command);
+            complete();
+        }
     }
 }

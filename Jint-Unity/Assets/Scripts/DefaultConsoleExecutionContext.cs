@@ -1,63 +1,68 @@
 using UnityEngine.UI;
 
-/// <summary>
-/// A default implementation of IConsoleExecutionContext. This uses a simple
-/// textfield.
-/// </summary>
-public class DefaultConsoleExecutionContext : IConsoleExecutionContext
+namespace TheGoldenMule
 {
     /// <summary>
-    /// Unity Text component.
+    /// A default implementation of IConsoleExecutionContext. This uses a simple
+    /// textfield.
     /// </summary>
-    private readonly Text _text;
-
-    /// <summary>
-    /// Creates a console context.
-    /// </summary>
-    /// <param name="textfield"></param>
-    public DefaultConsoleExecutionContext(Text textfield)
+    public class DefaultConsoleExecutionContext : IConsoleExecutionContext
     {
-        _text = textfield;
-    }
+        /// <summary>
+        /// Unity Text component.
+        /// </summary>
+        private readonly Text _text;
 
-    /// <summary>
-    /// Clears text.
-    /// </summary>
-    public void Clear()
-    {
-        if (null != _text)
+        /// <summary>
+        /// Creates a console context.
+        /// </summary>
+        /// <param name="textfield"></param>
+        public DefaultConsoleExecutionContext(Text textfield)
         {
-            _text.text = string.Empty;
-        }
-    }
-
-    /// <summary>
-    /// Writes test to the console.
-    /// </summary>
-    /// <param name="text"></param>
-    public void Write(string text)
-    {
-        if (null == _text)
-        {
-            return;
+            _text = textfield;
         }
 
-        _text.text += text ?? string.Empty;
-    }
-
-    /// <summary>
-    /// Writes a line to the console.
-    /// </summary>
-    /// <param name="line"></param>
-    public void WriteLine(string line)
-    {
-        line = line ?? string.Empty;
-
-        if (!line.EndsWith('\n'.ToString()))
+        /// <summary>
+        /// Clears text.
+        /// </summary>
+        public void Clear()
         {
-            line = line + '\n';
+            if (null != _text)
+            {
+                _text.text = string.Empty;
+            }
         }
 
-        Write(line);
+        /// <summary>
+        /// Writes test to the console.
+        /// </summary>
+        /// <param name="text"></param>
+        public void Write(string text)
+        {
+            if (null == _text)
+            {
+                return;
+            }
+
+            _text.text += text ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Writes a line to the console.
+        /// </summary>
+        /// <param name="line"></param>
+        public void WriteLine(string line)
+        {
+            line = line ?? string.Empty;
+
+            if (!line.EndsWith('\n'.ToString()))
+            {
+                line = line + '\n';
+            }
+
+            Write(line);
+        }
+
+
     }
 }
