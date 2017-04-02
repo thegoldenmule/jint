@@ -2,79 +2,19 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.UI;
-
-public interface IConsoleDelegate
-{
-    void Execute(
-        string command,
-        IConsoleContext context,
-        Action complete);
-}
-
-public interface IConsoleContext
-{
-    void Clear();
-    void WriteLine(string line);
-    void Write(string text);
-}
-
-public class DefaultConsoleContext : IConsoleContext
-{
-    private readonly Text _text;
-
-    public DefaultConsoleContext(Text textfield)
-    {
-        _text = textfield;
-    }
-
-    public void Clear()
-    {
-        if (null != _text)
-        {
-            _text.text = string.Empty;
-        }
-    }
-
-    /// <summary>
-    /// Writes test to the console.
-    /// </summary>
-    /// <param name="text"></param>
-    public void Write(string text)
-    {
-        if (null == _text)
-        {
-            return;
-        }
-
-        _text.text += text;
-    }
-
-    /// <summary>
-    /// Writes a line to the console.
-    /// </summary>
-    /// <param name="line"></param>
-    public void WriteLine(string line)
-    {
-        if (!line.EndsWith('\n'.ToString()))
-        {
-            line = line + '\n';
-        }
-
-        Write(line);
-    }
-}
 
 /// <summary>
-/// Very basic, very consistent console implementation. The only interface is
-/// for listening for complete commands to be input. For consistency, and
-/// compatibility with asynchronous commands, there is no public interface for
-/// writing to the Console. This is so that the prompt can be guaranteed to be
-/// correct.
+/// Very basic, but _consistent_ console implementation.
 /// 
 /// Usage:
 /// 
-/// console.CommandDelegate = this;
+/// // First, define a context. This object provides an interface for commands
+/// // to affect the console.
+/// console.ExecutionContext = new DefaultConsoleExecutionContext(myTextField);
+/// 
+/// // Then, set an IConsoleExecutionDelegate-- an object that parses + runs
+/// // commands.
+/// console.ExecutionDelegate = this;
 /// 
 /// ...
 /// 
@@ -95,9 +35,16 @@ public class DefaultConsoleContext : IConsoleContext
 public class Console : MonoBehaviour
 {
     /// <summary>
-    /// The context implementation.
+    /// An implementation of IConsoleExecutionContext, which provides an api
+    /// for commands.
     /// </summary>
-    public IConsoleContext Context;
+    public IConsoleExecutionContext ExecutionContext;
+
+    /// <summary>
+    /// Instead of using an event, which allows multiple subscribers, enforce
+    /// only one listener, so we can make command flow consistent.
+    /// </summary>
+    public IConsoleExecutionDelegate ExecutionDelegate; 
 
     /// <summary>
     /// Root of prompt. Always visible.
@@ -126,12 +73,6 @@ public class Console : MonoBehaviour
     private int _accumBufferIndex = 0;
 
     /// <summary>
-    /// Instead of using an event, which allows multiple subscribers, enforce
-    /// only one listener, so we can make command flow consistent.
-    /// </summary>
-    public IConsoleDelegate CommandDelegate; 
-
-    /// <summary>
     /// Pushes a dir onto the stack.
     /// </summary>
     /// <param name="dir"></param>
@@ -141,9 +82,9 @@ public class Console : MonoBehaviour
 
         BakePrompt();
 
-        if (null != Context)
+        if (null != ExecutionContext)
         {
-            Context.WriteLine(_prompt);
+            ExecutionContext.WriteLine(_prompt);
         }
     }
 
@@ -156,9 +97,9 @@ public class Console : MonoBehaviour
 
         BakePrompt();
 
-        if (null != Context)
+        if (null != ExecutionContext)
         {
-            Context.WriteLine(_prompt);
+            ExecutionContext.WriteLine(_prompt);
         }
     }
     
@@ -167,8 +108,8 @@ public class Console : MonoBehaviour
     /// </summary>
     public void Clear()
     {
-        Context.Clear();
-        Context.WriteLine(_prompt);
+        ExecutionContext.Clear();
+        ExecutionContext.WriteLine(_prompt);
     }
 
     /// <summary>
@@ -190,25 +131,7 @@ public class Console : MonoBehaviour
             // process command
             if (input[i] == '\n')
             {
-                var commandBuffer = new char[_accumBufferIndex];
-                Array.Copy(_accumBuffer, commandBuffer, _accumBufferIndex);
-                var command = commandBuffer.ToString();
-
-                // reset state before we do anything
-                _accumBufferIndex = 0;
-
-                if (EchoCommands)
-                {
-                    Context.WriteLine(command);
-                }
-
-                if (null != CommandDelegate)
-                {
-                    CommandDelegate.Execute(
-                        command,
-                        Context,
-                        CompleteCommand);
-                }
+                ProcessCommand();
             }
             else
             {
@@ -220,17 +143,49 @@ public class Console : MonoBehaviour
                     _accumBuffer = buffer;
                 }
 
+                ExecutionContext.Write(input[i].ToString());
                 _accumBuffer[_accumBufferIndex++] = input[i];
             }
+        }
+
+        if (Input.GetKeyUp(KeyCode.Return) || Input.GetKeyUp(KeyCode.KeypadEnter))
+        {
+            ProcessCommand();
         }
     }
 
     /// <summary>
-    /// Called by listener 
+    /// Called to execute a command.
+    /// </summary>
+    private void ProcessCommand()
+    {
+        var commandBuffer = new char[_accumBufferIndex];
+        Array.Copy(_accumBuffer, commandBuffer, _accumBufferIndex);
+        var command = commandBuffer.ToString();
+
+        // reset state before we do anything
+        _accumBufferIndex = 0;
+
+        if (EchoCommands)
+        {
+            ExecutionContext.WriteLine(command);
+        }
+
+        if (null != ExecutionDelegate)
+        {
+            ExecutionDelegate.Execute(
+                command,
+                ExecutionContext,
+                CompleteCommand);
+        }
+    }
+
+    /// <summary>
+    /// Called by listener when the command is finished.
     /// </summary>
     private void CompleteCommand()
     {
-        Context.WriteLine(_prompt);
+        ExecutionContext.WriteLine(_prompt);
     }
 
     /// <summary>

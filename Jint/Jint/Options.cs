@@ -25,7 +25,7 @@ namespace Jint
 
         public Options()
         {
-            LocalTimeZone = TimeZoneInfo.Local;
+            LocalTimeZone = TimeZoneInfo.Utc;
         }
 
         /// <summary>
