@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Jint.Native;
 using Jint.Runtime;
 using TheGoldenMule;
@@ -52,6 +53,12 @@ namespace JintUnity
             IConsoleExecutionContext context,
             Action complete)
         {
+            if (string.IsNullOrEmpty(command))
+            {
+                complete();
+                return;
+            }
+
             try
             {
                 _host.Execute(command);

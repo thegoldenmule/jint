@@ -60,6 +60,16 @@ namespace TheGoldenMule
         private readonly Stack<string> _dirs = new Stack<string>();
 
         /// <summary>
+        /// List of past commands.
+        /// </summary>
+        private readonly List<string> _commandHistory = new List<string>();
+
+        /// <summary>
+        /// Index into command history.
+        /// </summary>
+        private int _commandHistoryIndex = 0;
+
+        /// <summary>
         /// Prompt!
         /// </summary>
         private string _prompt;
@@ -137,6 +147,7 @@ namespace TheGoldenMule
         /// </summary>
         private void LateUpdate()
         {
+            bool processed = false;
             var input = Input.inputString.ToCharArray();
             for (int i = 0, len = input.Length; i < len; i++)
             {
@@ -144,6 +155,8 @@ namespace TheGoldenMule
                 if (input[i] == '\n')
                 {
                     ProcessCommand();
+
+                    processed = true;
                 }
                 else if (input[i] == '\b')
                 {
@@ -168,8 +181,35 @@ namespace TheGoldenMule
                 UpdatePromptText();
             }
 
+            if (Input.GetKeyUp(KeyCode.UpArrow))
+            {
+                var index = _commandHistoryIndex - 1;
+                if (index >= 0 && index < _commandHistory.Count)
+                {
+                    _commandHistoryIndex = index;
+                    SetCommand(_commandHistory[_commandHistoryIndex]);
+                }
+            }
+            else if (Input.GetKeyUp(KeyCode.DownArrow))
+            {
+                var index = _commandHistoryIndex + 1;
+                if (index >= 0)
+                {
+                    if (index < _commandHistory.Count)
+                    {
+                        _commandHistoryIndex = index;
+                        SetCommand(_commandHistory[_commandHistoryIndex]);
+                    }
+                    else
+                    {
+                        SetCommand(string.Empty);
+                    }
+                }
+            }
+
             // process command
-            if (Input.GetKeyUp(KeyCode.Return) || Input.GetKeyUp(KeyCode.KeypadEnter))
+            if (!processed
+                && (Input.GetKeyUp(KeyCode.Return) || Input.GetKeyUp(KeyCode.KeypadEnter)))
             {
                 ProcessCommand();
             }
@@ -180,9 +220,21 @@ namespace TheGoldenMule
         /// </summary>
         private void ProcessCommand()
         {
+            Debug.Log("Process command.");
+
             var commandBuffer = new char[_accumBufferIndex];
             Array.Copy(_accumBuffer, commandBuffer, _accumBufferIndex);
             var command = new string(commandBuffer);
+
+            if (!string.IsNullOrEmpty(command))
+            {
+                if (0 == _commandHistory.Count
+                    || _commandHistory[_commandHistory.Count - 1] != command)
+                {
+                    _commandHistory.Add(command);
+                    _commandHistoryIndex = _commandHistory.Count;
+                }
+            }
 
             // reset state before we execute
             _accumBufferIndex = 0;
@@ -227,6 +279,22 @@ namespace TheGoldenMule
         }
 
         /// <summary>
+        /// Sets the command to a specific string.
+        /// </summary>
+        /// <param name="command"></param>
+        private void SetCommand(string command)
+        {
+            var charArray = command.ToCharArray();
+            Array.Copy(
+                charArray,
+                _accumBuffer,
+                charArray.Length);
+            _accumBufferIndex = charArray.Length;
+
+            UpdatePromptText();
+        }
+
+        /// <summary>
         /// Writes the prompt to the textfield again.
         /// </summary>
         private void InitPrompt()
@@ -250,6 +318,8 @@ namespace TheGoldenMule
 
             text += new string(commandBuffer);
             Text.text = text;
+
+            _commandHistoryIndex = _commandHistory.Count;
         }
 
         /// <summary>
