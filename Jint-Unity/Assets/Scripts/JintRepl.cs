@@ -1,7 +1,10 @@
 ﻿using System;
+using Jint.Native;
+using Jint.Runtime;
 using TheGoldenMule;
 using UnityEngine;
 using Console = TheGoldenMule.Console;
+using Types = Jint.Runtime.Types;
 
 namespace JintUnity
 {
@@ -52,7 +55,18 @@ namespace JintUnity
             try
             {
                 _host.Execute(command);
-                context.WriteLine(" => " + _host.GetCompletionValue());
+
+                var result = _host.GetValue(_host.Execute(command).GetCompletionValue());
+                if (result.Type != Types.None
+                    && result.Type != Types.Null
+                    && result.Type != Types.Undefined)
+                {
+                    var str = TypeConverter.ToString(
+                        _host.Json.Stringify(
+                            _host.Json,
+                            Arguments.From(result, Undefined.Instance, "  ")));
+                    context.WriteLine(" => " + str);
+                }
             }
             catch (Exception exception)
             {

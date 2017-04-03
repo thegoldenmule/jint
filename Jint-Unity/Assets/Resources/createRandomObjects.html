@@ -1,0 +1,25 @@
+// describes the serialized objects we need
+var Serialized = {
+    numCubes:
+    {
+        type: "Int",
+        tooltip: "Number of prefabs to instantiate."
+    },
+    cube:
+    {
+    	type: "Prefab",
+    	tooltup: "The prefab to instantiate."
+    },
+    bounds:
+    {
+    	type: "Bounds",
+    	tooltip: "The bounds in which we should instantiate cubes."
+    }
+};
+
+var names = [];
+for (var i = 0; i < numCubes; i++) {
+	cube.instantiate({
+		position: bounds.Random()
+	})
+}
