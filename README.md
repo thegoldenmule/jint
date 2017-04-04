@@ -6,9 +6,9 @@
 * Fixes for **iOS compatibility**: yes, this runs on iOS!
 * **Deep integration** with Unity: APIs for days!
 * An awesome **Unity scene query language** aptly named UQL.
-* Useful platform APIs!
+* Useful platform APIs:
 	* Modularize with **[require()](docs/require.md)**!
-	* Plugin to DI with **[inject()](docs/inject.md)**!
+	* Plugin to DI frameworks with **[inject()](docs/inject.md)**!
 * Lots of Unity examples-- including a **full REPL**.
 
 ![Example](docs/example.png)

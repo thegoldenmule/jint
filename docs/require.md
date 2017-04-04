@@ -1,4 +1,4 @@
-#### Require
+#### require()
 
 The `require` method should be familiar to anyone that has worked with **[node.js](https://nodejs.org/en/)**. Essentially, `require` allows for modularization of js code. It is not builtin to the language, it is builtin to the platform.
 
