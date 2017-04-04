@@ -12,3 +12,9 @@
 * Lots of Unity examples-- including a **full REPL**.
 
 ![Example](docs/example.png)
+
+##### Build Process
+
+All Jint projects can be found in Master.sln, which can be built like any Visual Studio Solution.
+
+If you'd like to build all project and copy all project dlls into all examples, run `gradle buildAll`. This, of course, requires **[gradle](http://gradle.org)**.

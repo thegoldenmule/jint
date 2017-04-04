@@ -1,0 +1,32 @@
+def msbuildAbsPath="C:/Windows/Microsoft.NET/Framework/v4.0.30319/MSBuild.exe"
+def solutionRelPath="Master.sln"
+
+def configuration = "Debug"
+
+task buildAll {
+	doLast {
+		
+		// execute build
+		exec {
+			executable msbuildAbsPath
+			args "/t:Clean,Build", solutionRelPath
+		}
+
+		// copy each dll to each example project
+		def sources = [
+			"Jint/Jint/bin/$configuration/Jint.dll",
+			"Jint/Jint/bin/$configuration/Jint.pdb",
+			"Jint.Unity/bin/$configuration/Jint.Unity.dll",
+			"Jint.Unity/bin/$configuration/Jint.Unity.pdb",
+			"Jint.Ninject/bin/$configuration/Jint.Ninject.dll",
+			"Jint.Ninject/bin/$configuration/Jint.Ninject.pdb"]
+		def targets = ["Examples/Repl/Assets/Plugins"]
+		for (source in sources) {
+			def sourceFile = new File(source)
+			for (target in targets) {
+				def targetFile = new File(target + '/' + sourceFile.name)
+				targetFile << sourceFile.bytes
+			}
+		}
+	}
+}

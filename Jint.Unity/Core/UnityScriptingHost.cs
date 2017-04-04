@@ -1,10 +1,8 @@
 ﻿using System;
-using Jint;
 using Jint.Native;
-using Jint.Runtime;
 using UnityEngine;
 
-namespace JintUnity
+namespace Jint.Unity
 {
     /// <summary>
     /// Hosts scripts and provides a default Unity API.
@@ -32,6 +30,16 @@ module = null;
 ";
 
         /// <summary>
+        /// Loads scripts.
+        /// </summary>
+        private readonly IScriptLoader _loader;
+
+        /// <summary>
+        /// Object to resolve dependencies.
+        /// </summary>
+        private readonly IScriptDependencyResolver _resolver;
+
+        /// <summary>
         /// Sequential ids for requires.
         /// </summary>
         private int _ids = 0;
@@ -39,9 +47,14 @@ module = null;
         /// <summary>
         /// Constructor.
         /// </summary>
-        public UnityScriptingHost()
+        public UnityScriptingHost(
+            IScriptLoader loader,
+            IScriptDependencyResolver resolver)
             : base(options => options.AllowClr())
         {
+            _loader = loader;
+            _resolver = resolver;
+
             SetValue("Log", new UnityLogWrapper());
             SetValue("Scene", new UnitySceneManager());
             
@@ -55,16 +68,16 @@ module = null;
         /// <param name="scriptName"></param>
         private JsValue Require(string scriptName)
         {
-            var resource = Resources.Load<TextAsset>(scriptName);
-            if (null == resource)
+            string script;
+            if (!_loader.Load(scriptName, out script))
             {
                 return JsValue.Undefined;
             }
-
+            
             // modularize it
             var variableName = "require" + _ids++;
             var moduleCode = REQUIRE_TEMPLATE
-                .Replace("{{script}}", resource.text)
+                .Replace("{{script}}", script)
                 .Replace("{{variableName}}", variableName);
 
             JsValue module;
@@ -83,6 +96,11 @@ module = null;
             return module;
         }
 
+        /// <summary>
+        /// Injector.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         private object Inject(string name)
         {
             return null;

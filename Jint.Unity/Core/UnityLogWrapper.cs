@@ -1,4 +1,4 @@
-﻿namespace JintUnity
+﻿namespace Jint.Unity
 {
     /// <summary>
     /// Wraps Unity logging interface for Jint.

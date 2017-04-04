@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using Jint.Native;
 using Jint.Runtime;
+using Jint.Ninject;
 using TheGoldenMule;
 using UnityEngine;
 using Console = TheGoldenMule.Console;
 using Types = Jint.Runtime.Types;
 
-namespace JintUnity
+namespace Jint.Unity.Examples
 {
     /// <summary>
     /// A very basic REPL.
@@ -22,7 +22,9 @@ namespace JintUnity
         /// <summary>
         /// Scripting host to use.
         /// </summary>
-        private readonly UnityScriptingHost _host = new UnityScriptingHost();
+        private readonly UnityScriptingHost _host = new UnityScriptingHost(
+            new ResourcesScriptLoader(),
+            new NinjectScriptDependencyResolver(null));
 
         /// <summary>
         /// Called to initialize.

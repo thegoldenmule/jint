@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-namespace JintUnity
+namespace Jint.Unity
 {
     /// <summary>
     /// Pulls apart query details and runs a query on a Unity object.

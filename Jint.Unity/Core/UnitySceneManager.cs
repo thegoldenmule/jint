@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace JintUnity
+namespace Jint.Unity
 {
     /// <summary>
     /// Responsible for running UQL queries.

@@ -33,9 +33,9 @@ module.exports = {
 };
 ```
 
-Whatever is assigned to `module.exports` will be returned by a require.
+Whatever is assigned to `module.exports` will be returned by a `require()`.
 
-Next, we place this scripts in our `Resources` folder (this can be extended to load from other places, or even stream in asynchronously). When `require` is called, this entire script will be executed and that object will be returned.
+Next, we place this script in our `Resources` folder (look below if you don't want to use resources). When `require` is called, this entire script will be executed and that object will be returned.
 
 With the script in the right place, we can now try this out in our REPL:
 

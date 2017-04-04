@@ -1,5 +1,6 @@
 ##### Roadmap
 
 * `inject()`
-* `async()`
+* `await()`
+* UQL.
 * Serialization + inspector integration.
