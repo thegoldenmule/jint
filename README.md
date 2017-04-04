@@ -7,11 +7,11 @@
 * **Deep integration** with Unity: APIs for days!
 * An awesome **Unity scene query language** aptly named UQL.
 * Useful platform APIs:
-	* Modularize with **[require()](docs/require.md)**!
-	* Plugin to DI frameworks with **[inject()](docs/inject.md)**!
+	* Modularize with **[require()](Documentation/require.md)**!
+	* Plugin to DI frameworks with **[inject()](Documentation/inject.md)**!
 * Lots of Unity examples-- including a **full REPL**.
 
-![Example](docs/example.png)
+![Example](Documentation/example.png)
 
 ##### Build Process
 
