@@ -1,0 +1,8 @@
+module.exports = {
+	random: {
+		value: Math.random(),
+		range: function(a, b) {
+			return a + Math.floor((b - a) * Math.random());
+		}
+	}
+}

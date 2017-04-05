@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DBE8537B-1824-4A93-9C64-396B81B57292}</ProjectGuid>
+    <ProjectGuid>{F334279B-47B1-4C42-9E9A-B22D88BFE5BF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Jint.Unity</RootNamespace>
-    <AssemblyName>Jint.Unity</AssemblyName>
+    <RootNamespace>Jint.Unity.Editor</RootNamespace>
+    <AssemblyName>Jint.Unity.Editor</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
@@ -32,33 +32,30 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="UnityEditor">
+      <HintPath>.\UnityEditor.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>.\UnityEngine.dll</HintPath>
-      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Resolver\IScriptDependencyResolver.cs" />
-    <Compile Include="Loader\IScriptLoader.cs" />
-    <Compile Include="Loader\ResourcesScriptLoader.cs" />
-    <Compile Include="MonoBehaviourScriptingHost.cs" />
-    <Compile Include="Resolver\NullScriptingDependencyResolver.cs" />
-    <Compile Include="Resolver\TypeScriptingDependencyResolver.cs" />
-    <Compile Include="ScriptReference.cs" />
-    <Compile Include="Serialization\ScriptingPropertyBucket.cs" />
-    <Compile Include="UnityLogWrapper.cs" />
-    <Compile Include="UQL\UnitySceneManager.cs" />
-    <Compile Include="UQL\UnitySceneQuery.cs" />
-    <Compile Include="UnityScriptingHost.cs" />
+    <Compile Include="EditorWindow\ScriptSelectionEditorWindow.cs" />
+    <Compile Include="Inspector\MonoBehaviourScriptingHostInspector.cs" />
+    <Compile Include="PropertyDrawer\ScriptingPropertyBucketDrawer.cs" />
+    <Compile Include="PropertyDrawer\ScriptReferenceDrawer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Jint.Unity\Jint.Unity.csproj">
+      <Project>{dbe8537b-1824-4a93-9c64-396b81b57292}</Project>
+      <Name>Jint.Unity</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Jint\Jint\Jint.csproj">
       <Project>{4b262a20-6905-4dde-a783-ae38c9822673}</Project>
       <Name>Jint</Name>
-      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

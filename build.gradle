@@ -1,16 +1,39 @@
 def msbuildAbsPath="C:/Windows/Microsoft.NET/Framework/v4.0.30319/MSBuild.exe"
 def solutionRelPath="Master.sln"
 
-def configuration = "Debug"
+def multiCopy = { sources, targets ->
+	for (source in sources) {
+		def sourceFile = new File(source)
+		for (target in targets) {
+			def targetFile = new File(target + '/' + sourceFile.name)
+			if (targetFile.exists()) {
+				targetFile.delete()
+			}
+			
+			targetFile << sourceFile.bytes
+		}
+	}
+}
 
 task buildAll {
-	doLast {
+	doLast { task ->
 		
 		// execute build
 		exec {
 			executable msbuildAbsPath
 			args "/t:Clean,Build", solutionRelPath
 		}
+
+		// determine configuration
+		def configuration = "Debug"
+		if (task.project.hasProperty('configuration')) {
+			configuration = task.project.configuration
+		}
+
+		def projects = [
+			"Examples/Repl",
+			"Examples/UQL",
+			"Examples/MonoBehaviourScripting"]
 
 		// copy each dll to each example project
 		def sources = [
@@ -20,13 +43,20 @@ task buildAll {
 			"Jint.Unity/bin/$configuration/Jint.Unity.pdb",
 			"Jint.Ninject/bin/$configuration/Jint.Ninject.dll",
 			"Jint.Ninject/bin/$configuration/Jint.Ninject.pdb"]
-		def targets = ["Examples/Repl/Assets/Plugins"]
-		for (source in sources) {
-			def sourceFile = new File(source)
-			for (target in targets) {
-				def targetFile = new File(target + '/' + sourceFile.name)
-				targetFile << sourceFile.bytes
-			}
-		}
+		def targets = projects.collect { it + "/Assets/Plugins" }
+		multiCopy(sources, targets)
+		
+
+		sources = [
+			"Jint.Unity.Editor/bin/$configuration/Jint.Unity.Editor.dll",
+			"Jint.Unity.Editor/bin/$configuration/Jint.Unity.Editor.pdb"]
+		targets = projects.collect { it + "/Assets/Plugins/Editor" }
+		multiCopy(sources, targets)
+	}
+}
+
+task deployUnityUpgrade {
+	doLast { task ->
+		// TODO
 	}
 }

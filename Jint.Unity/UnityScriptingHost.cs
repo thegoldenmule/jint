@@ -30,19 +30,19 @@ module = null;
 ";
 
         /// <summary>
+        /// Sequential ids for requires.
+        /// </summary>
+        private int _ids = 0;
+
+        /// <summary>
         /// Loads scripts.
         /// </summary>
-        private readonly IScriptLoader _loader;
+        public IScriptLoader Loader;
 
         /// <summary>
         /// Object to resolve dependencies.
         /// </summary>
-        private readonly IScriptDependencyResolver _resolver;
-
-        /// <summary>
-        /// Sequential ids for requires.
-        /// </summary>
-        private int _ids = 0;
+        public IScriptDependencyResolver Resolver;
 
         /// <summary>
         /// Constructor.
@@ -52,8 +52,8 @@ module = null;
             IScriptDependencyResolver resolver)
             : base(options => options.AllowClr())
         {
-            _loader = loader;
-            _resolver = resolver;
+            Loader = loader;
+            Resolver = resolver;
 
             SetValue("Log", new UnityLogWrapper());
             SetValue("Scene", new UnitySceneManager());
@@ -68,8 +68,13 @@ module = null;
         /// <param name="scriptName"></param>
         private JsValue Require(string scriptName)
         {
+            if (null == Loader)
+            {
+                return JsValue.Undefined;
+            }
+
             string script;
-            if (!_loader.Load(scriptName, out script))
+            if (!Loader.Load(scriptName, out script))
             {
                 return JsValue.Undefined;
             }
@@ -103,7 +108,12 @@ module = null;
         /// <returns></returns>
         private object Inject(string name)
         {
-            return null;
+            if (null == Resolver)
+            {
+                return null;
+            }
+
+            return Resolver.Resolve(name);
         }
     }
 }

@@ -17,4 +17,8 @@
 
 All Jint projects can be found in Master.sln, which can be built like any Visual Studio Solution.
 
-If you'd like to build all project and copy all project dlls into all examples, run `gradle buildAll`. This, of course, requires **[gradle](http://gradle.org)**.
+If you'd like to build all project and copy all project dlls into all examples, run `gradle buildAll`. This, of course, requires **[gradle](http://gradle.org)**. This task  defaults to the `Debug` configuration. To use release dlls instead, use `-Pconfiguration=Release`.
+
+##### Roadmap
+
+Our roadmap can be found **[here](Documentation/roadmap.md)**.
