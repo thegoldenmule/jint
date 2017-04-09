@@ -15,9 +15,16 @@
 
 ##### Build Process
 
-All Jint projects can be found in Master.sln, which can be built like any Visual Studio Solution.
+All Jint projects can be found in `Master.sln`, which can be built like any Visual Studio Solution-- via Visual Studio, `msbuild` (.NET), or `xbuild` (Mono). This solution outputs a set of dlls.
 
-If you'd like to build all project and copy all project dlls into all examples, run `gradle buildAll`. This, of course, requires **[gradle](http://gradle.org)**. This task  defaults to the `Debug` configuration. To use release dlls instead, use `-Pconfiguration=Release`.
+We use **[gradle](http://gradle.org)** to orchestrate this process. Individual `gradle` tasks are outlined below.
+
+###### buildAll
+
+Builds all `Jint-Unity` projects and copies all project dlls into each example project.
+
+_Properties_
+* **configuration** - Defaults to `Debug`. Specifies which build configuration to copy. Eg - `gradle buildAll -Pconfiguration=Release` will copy release dlls into projects..
 
 ##### Roadmap
 

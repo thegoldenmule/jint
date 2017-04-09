@@ -9,6 +9,11 @@ def multiCopy = { sources, targets ->
 			if (targetFile.exists()) {
 				targetFile.delete()
 			}
+
+			def targetDir = new File(targetFile.getParent())
+			if (!targetDir.exists()) {
+				targetDir.mkdirs()
+			}
 			
 			targetFile << sourceFile.bytes
 		}
@@ -46,17 +51,27 @@ task buildAll {
 		def targets = projects.collect { it + "/Assets/Plugins" }
 		multiCopy(sources, targets)
 		
-
+		// editor dlls
 		sources = [
 			"Jint.Unity.Editor/bin/$configuration/Jint.Unity.Editor.dll",
 			"Jint.Unity.Editor/bin/$configuration/Jint.Unity.Editor.pdb"]
 		targets = projects.collect { it + "/Assets/Plugins/Editor" }
+		multiCopy(sources, targets)
+
+		// copy common scripts to example project
+		sources = []
+		new File("CommonScripts").traverse(
+			type: groovy.io.FileType.FILES,
+			nameFilter: ~/.*\.html$/) {
+				sources.add(it.getAbsolutePath())
+			}
+		targets = projects.collect { it + "/Assets/Resources" }
 		multiCopy(sources, targets)
 	}
 }
 
 task deployUnityUpgrade {
 	doLast { task ->
-		// TODO
+		// TODO -- copy unity dlls into projects
 	}
 }

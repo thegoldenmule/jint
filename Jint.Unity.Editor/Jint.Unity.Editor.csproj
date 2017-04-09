@@ -43,6 +43,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\List\LabelListElement.cs" />
+    <Compile Include="Components\List\ListComponent.cs" />
+    <Compile Include="Components\List\ListElement.cs" />
     <Compile Include="EditorWindow\ScriptSelectionEditorWindow.cs" />
     <Compile Include="Inspector\MonoBehaviourScriptingHostInspector.cs" />
     <Compile Include="PropertyDrawer\ScriptingPropertyBucketDrawer.cs" />
